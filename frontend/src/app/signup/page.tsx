@@ -1,0 +1,98 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { Scissors, Eye, EyeOff } from "lucide-react";
+
+export default function SignupPage() {
+  const [showPassword, setShowPassword] = useState(false);
+
+  return (
+    <main className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-center p-6 selection:bg-[#dfb771] selection:text-black">
+      
+      {/* Logo */}
+      <Link href="/" className="flex items-center gap-2 text-[#dfb771] mb-10 hover:opacity-80 transition-opacity">
+        <Scissors size={28} />
+        <span className="text-2xl font-serif tracking-wide">CutCraft</span>
+      </Link>
+
+      {/* Signup Card */}
+      <div className="w-full max-w-md bg-[#111111] border border-white/5 rounded-2xl p-8 sm:p-10 shadow-2xl">
+        <h1 className="text-3xl font-serif mb-2">Reserve your chair</h1>
+        <p className="text-gray-400 text-sm mb-8">Create an account to start booking.</p>
+
+        <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+          
+          {/* Full Name */}
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium mb-2">Full name</label>
+            <input 
+              type="text" 
+              id="name"
+              className="w-full bg-[#0a0a0a] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#dfb771] focus:ring-1 focus:ring-[#dfb771] transition-all"
+              required
+            />
+          </div>
+
+          {/* Email */}
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium mb-2">Email</label>
+            <input 
+              type="email" 
+              id="email"
+              className="w-full bg-[#0a0a0a] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#dfb771] focus:ring-1 focus:ring-[#dfb771] transition-all"
+              required
+            />
+          </div>
+
+          {/* Phone (Optional) */}
+          <div>
+            <label htmlFor="phone" className="block text-sm font-medium mb-2">Phone (optional)</label>
+            <input 
+              type="tel" 
+              id="phone"
+              className="w-full bg-[#0a0a0a] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#dfb771] focus:ring-1 focus:ring-[#dfb771] transition-all"
+            />
+          </div>
+
+          {/* Password with Visibility Toggle */}
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium mb-2">Password</label>
+            <div className="relative">
+              <input 
+                type={showPassword ? "text" : "password"} 
+                id="password"
+                className="w-full bg-[#0a0a0a] border border-white/10 rounded-lg px-4 py-3 pr-12 text-white placeholder-gray-600 focus:outline-none focus:border-[#dfb771] focus:ring-1 focus:ring-[#dfb771] transition-all"
+                required
+              />
+              <button 
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#dfb771] transition-colors"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <button 
+            type="submit"
+            className="w-full bg-[#dfb771] text-black font-medium text-base py-3.5 rounded-lg mt-4 hover:bg-[#cda661] transition-colors active:scale-[0.98]"
+          >
+            Create account
+          </button>
+        </form>
+
+        {/* Footer */}
+        <div className="mt-8 text-center text-sm text-gray-400">
+          Already have an account?{" "}
+          <Link href="/login" className="text-[#dfb771] hover:text-[#cda661] transition-colors">
+            Sign in
+          </Link>
+        </div>
+      </div>
+    </main>
+  );
+}
