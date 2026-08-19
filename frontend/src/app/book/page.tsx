@@ -46,17 +46,62 @@ export default function BookPage() {
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Helper to get the selected service object
   const activeService = services.find(s => s.id === selectedService);
 
-  const handleBooking = (e: React.FormEvent) => {
+  const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!activeService || !selectedDate || !selectedTime) return;
+
     setIsSubmitting(true);
-    // Simulate API call before redirecting
-    setTimeout(() => {
-      router.push('/appointments?success=true');
-    }, 800);
+    setErrorMessage("");
+
+    try {
+      const token = localStorage.getItem("access_token");
+      
+      // Format time from "10:00 AM" to "10:00:00" for Django backend
+      const convertTo24Hour = (timeStr: string) => {
+        const [time, modifier] = timeStr.split(" ");
+        let [hours, minutes] = time.split(":");
+        if (hours === "12") {
+          hours = modifier === "PM" ? "12" : "00";
+        } else if (modifier === "PM") {
+          hours = String(parseInt(hours, 10) + 12);
+        }
+        return `${hours.padStart(2, '0')}:${minutes}:00`;
+      };
+
+      const formattedTime = convertTo24Hour(selectedTime);
+      const formattedDate = `2026-08-${String(selectedDate).padStart(2, '0')}`;
+
+      const response = await fetch("http://localhost:8000/api/appointments/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          service: activeService.name,
+          barber: "Master Barber", // Default barber value
+          date: formattedDate,
+          time: formattedTime,
+          notes: notes
+        }),
+      });
+
+      if (response.ok) {
+        router.push('/appointments?success=true');
+      } else {
+        const data = await response.json();
+        setErrorMessage(data.detail || "Failed to create appointment. Please try again.");
+        setIsSubmitting(false);
+      }
+    } catch (err) {
+      setErrorMessage("Network error. Make sure the backend server is running.");
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -75,6 +120,12 @@ export default function BookPage() {
           </span>
           <h1 className="text-4xl md:text-6xl font-serif">Reserve your moment.</h1>
         </div>
+
+        {errorMessage && (
+          <div className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+            {errorMessage}
+          </div>
+        )}
 
         {/* Step 1: Choose Service */}
         <div className="mb-16">

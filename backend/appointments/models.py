@@ -33,3 +33,16 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+
+class Appointment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='appointments')
+    service = models.CharField(max_length=100)
+    barber = models.CharField(max_length=100)
+    date = models.DateField()
+    time = models.TimeField()
+    notes = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=20, default='Pending') # Pending, Confirmed, Completed
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.service} on {self.date} at {self.time}"        

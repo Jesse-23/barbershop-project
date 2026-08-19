@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import { Scissors, MapPin, CheckCircle2 } from "lucide-react";
+import { Scissors, MapPin, CheckCircle2, Calendar, Clock } from "lucide-react";
 
 // Social Icons
 const Instagram = ({ size = 24 }) => (
@@ -26,6 +26,8 @@ function AppointmentsContent() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState("Upcoming");
   const [showToast, setShowToast] = useState(false);
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Check if we just redirected here from a successful booking
@@ -36,6 +38,40 @@ function AppointmentsContent() {
       return () => clearTimeout(timer);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+        const response = await fetch("http://localhost:8000/api/appointments/", {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setAppointments(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch appointments", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAppointments();
+  }, []);
+
+  // Filter logic based on tabs
+  const filteredAppointments = appointments.filter((apt) => {
+    const today = new Date().toISOString().split('T')[0];
+    if (activeTab === "Upcoming") {
+      return apt.date >= today;
+    } else if (activeTab === "Past") {
+      return apt.date < today;
+    }
+    return true; // "All"
+  });
 
   return (
     <div className="flex-grow flex flex-col relative w-full">
@@ -84,18 +120,54 @@ function AppointmentsContent() {
           ))}
         </div>
 
-        {/* Empty State Box */}
-        <div className="bg-[#111111] border border-white/5 rounded-2xl p-16 flex flex-col items-center justify-center text-center">
-          <Scissors size={40} className="text-[#dfb771]/50 mb-6" />
-          <h3 className="text-2xl font-serif mb-2">Nothing here yet.</h3>
-          <p className="text-gray-400 mb-8">Book your next visit.</p>
-          <Link 
-            href="/book" 
-            className="bg-[#dfb771] text-black px-8 py-3 rounded font-medium hover:bg-[#cda661] transition-colors text-sm"
-          >
-            Book now
-          </Link>
-        </div>
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <div className="w-8 h-8 border-2 border-[#dfb771] border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : filteredAppointments.length > 0 ? (
+          <div className="grid grid-cols-1 gap-6">
+            {filteredAppointments.map((apt) => (
+              <div key={apt.id} className="bg-[#111111] border border-white/5 rounded-2xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+                <div className="flex items-start gap-4">
+                  <div className="bg-[#dfb771]/10 text-[#dfb771] p-3 rounded-xl mt-1">
+                    <Scissors size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-serif mb-2">{apt.service}</h3>
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400">
+                      <span className="flex items-center gap-1.5"><Calendar size={16} className="text-[#dfb771]" /> {apt.date}</span>
+                      <span className="flex items-center gap-1.5"><Clock size={16} className="text-[#dfb771]" /> {apt.time}</span>
+                      <span>Barber: <strong className="text-white">{apt.barber}</strong></span>
+                    </div>
+                    {apt.notes && (
+                      <p className="text-xs text-gray-500 mt-2">Notes: {apt.notes}</p>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    apt.status === 'Confirmed' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                  }`}>
+                    {apt.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          /* Empty State Box */
+          <div className="bg-[#111111] border border-white/5 rounded-2xl p-16 flex flex-col items-center justify-center text-center">
+            <Scissors size={40} className="text-[#dfb771]/50 mb-6" />
+            <h3 className="text-2xl font-serif mb-2">Nothing here yet.</h3>
+            <p className="text-gray-400 mb-8">Book your next visit.</p>
+            <Link 
+              href="/book" 
+              className="bg-[#dfb771] text-black px-8 py-3 rounded font-medium hover:bg-[#cda661] transition-colors text-sm"
+            >
+              Book now
+            </Link>
+          </div>
+        )}
 
       </div>
     </div>

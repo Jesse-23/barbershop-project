@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from .models import Appointment
 
 # We use get_user_model to dynamically reference your custom User model
 User = get_user_model()
@@ -17,3 +18,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         # This ensures the password gets correctly hashed
         user = User.objects.create_user(**validated_data)
         return user
+
+
+class AppointmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Appointment
+        fields = ['id', 'service', 'barber', 'date', 'time', 'notes', 'status', 'created_at']
+        read_only_fields = ['id', 'status', 'created_at']

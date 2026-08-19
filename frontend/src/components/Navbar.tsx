@@ -12,7 +12,7 @@ export default function Navbar({ isAuth = false }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <header className={isAuth ? "border-b border-white/5 bg-[#0a0a0a] relative z-50" : "fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-white/5"}>
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-white/5">
       <nav className="flex justify-between items-center px-8 py-6 max-w-7xl mx-auto w-full">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 text-[#dfb771]">
