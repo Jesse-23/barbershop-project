@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { 
@@ -26,6 +29,16 @@ const Facebook = ({ size = 24 }) => (
 );
 
 export default function Dashboard() {
+  const [userName, setUserName] = useState("Gentleman");
+
+  useEffect(() => {
+    // Retrieve the user's name saved during signup or fallback to email username prefix
+    const storedName = localStorage.getItem("user_name");
+    if (storedName) {
+      setUserName(storedName);
+    }
+  }, []);
+
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white selection:bg-[#dfb771] selection:text-black flex flex-col">
       
@@ -40,7 +53,7 @@ export default function Dashboard() {
           <span className="text-[#dfb771] text-xs tracking-[0.2em] font-medium uppercase mb-4 block">
             Welcome back
           </span>
-          <h1 className="text-4xl font-serif mb-2">Gentleman.</h1>
+          <h1 className="text-4xl font-serif mb-2">{userName}.</h1>
           <p className="text-gray-400">Here's what's on your calendar.</p>
         </div>
 

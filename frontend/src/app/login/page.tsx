@@ -2,14 +2,50 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Scissors, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const router = useRouter();
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const response = await fetch("http://localhost:8000/api/login/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Store the JWT tokens securely in localStorage
+        localStorage.setItem("access_token", data.access);
+        localStorage.setItem("refresh_token", data.refresh);
+        localStorage.setItem("user_name", data.name);
+
+        // Redirect to the dashboard
+        router.push("/dashboard");
+      } else {
+        setError("Invalid email or password.");
+      }
+    } catch (err) {
+      setError("Network error. Make sure the backend server is running.");
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-center p-6 selection:bg-[#dfb771] selection:text-black">
-      
+
       {/* Logo */}
       <Link href="/" className="flex items-center gap-2 text-[#dfb771] mb-10 hover:opacity-80 transition-opacity">
         <Scissors size={28} />
@@ -21,14 +57,22 @@ export default function LoginPage() {
         <h1 className="text-3xl font-serif mb-2">Welcome back</h1>
         <p className="text-gray-400 text-sm mb-8">Sign in to manage your chair.</p>
 
-        <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
-          
+        {error && (
+          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
+            {error}
+          </div>
+        )}
+
+        <form className="space-y-5" onSubmit={handleLogin}>
+
           {/* Email */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium mb-2">Email</label>
             <input 
               type="email" 
               id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full bg-[#0a0a0a] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#dfb771] focus:ring-1 focus:ring-[#dfb771] transition-all"
               required
             />
@@ -41,6 +85,8 @@ export default function LoginPage() {
               <input 
                 type={showPassword ? "text" : "password"} 
                 id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full bg-[#0a0a0a] border border-white/10 rounded-lg px-4 py-3 pr-12 text-white placeholder-gray-600 focus:outline-none focus:border-[#dfb771] focus:ring-1 focus:ring-[#dfb771] transition-all"
                 required
               />

@@ -2,10 +2,59 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Scissors, Eye, EyeOff } from "lucide-react";
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const router = useRouter();
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const response = await fetch("http://localhost:8000/api/signup/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, phone, password }),
+      });
+
+      if (response.ok) {
+        // Automatically log the user in after successful signup
+        const loginResponse = await fetch("http://localhost:8000/api/login/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        if (loginResponse.ok) {
+          const loginData = await loginResponse.json();
+          localStorage.setItem("access_token", loginData.access);
+          localStorage.setItem("refresh_token", loginData.refresh);
+          // Save the user's name locally so the dashboard can display it immediately
+          localStorage.setItem("user_name", name);
+        }
+
+        // Redirect directly to the dashboard
+        router.push("/dashboard");
+      } else {
+        const data = await response.json();
+        setError(data.email?.[0] || data.password?.[0] || "Registration failed. Please try again.");
+      }
+    } catch (err) {
+      setError("Network error. Make sure the backend server is running.");
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white flex flex-col items-center justify-center p-6 selection:bg-[#dfb771] selection:text-black">
@@ -21,7 +70,13 @@ export default function SignupPage() {
         <h1 className="text-3xl font-serif mb-2">Reserve your chair</h1>
         <p className="text-gray-400 text-sm mb-8">Create an account to start booking.</p>
 
-        <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+        {error && (
+          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
+            {error}
+          </div>
+        )}
+
+        <form className="space-y-5" onSubmit={handleSignup}>
           
           {/* Full Name */}
           <div>
@@ -29,6 +84,8 @@ export default function SignupPage() {
             <input 
               type="text" 
               id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="w-full bg-[#0a0a0a] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#dfb771] focus:ring-1 focus:ring-[#dfb771] transition-all"
               required
             />
@@ -40,6 +97,8 @@ export default function SignupPage() {
             <input 
               type="email" 
               id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full bg-[#0a0a0a] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#dfb771] focus:ring-1 focus:ring-[#dfb771] transition-all"
               required
             />
@@ -51,6 +110,8 @@ export default function SignupPage() {
             <input 
               type="tel" 
               id="phone"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
               className="w-full bg-[#0a0a0a] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#dfb771] focus:ring-1 focus:ring-[#dfb771] transition-all"
             />
           </div>
@@ -62,6 +123,8 @@ export default function SignupPage() {
               <input 
                 type={showPassword ? "text" : "password"} 
                 id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full bg-[#0a0a0a] border border-white/10 rounded-lg px-4 py-3 pr-12 text-white placeholder-gray-600 focus:outline-none focus:border-[#dfb771] focus:ring-1 focus:ring-[#dfb771] transition-all"
                 required
               />
