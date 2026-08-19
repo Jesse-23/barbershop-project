@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Scissors, Menu, X, LogOut } from "lucide-react";
 
 interface NavbarProps {
@@ -10,6 +11,28 @@ interface NavbarProps {
 
 export default function Navbar({ isAuth = false }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (isAuth) {
+      // Check localStorage to verify if the logged-in user is you
+      const storedName = localStorage.getItem("user_name");
+      const storedEmail = localStorage.getItem("user_email");
+      
+      // Update this email string to match your exact admin login email
+      if (storedName === "jessemaduka85" || storedEmail === "your-email@example.com") {
+        setIsAdmin(true);
+      }
+    }
+  }, [isAuth]);
+
+  // Helper to dynamically style active links
+  const getLinkStyle = (path: string) => {
+    return pathname === path 
+      ? "text-[#dfb771] transition-colors" 
+      : "hover:text-[#dfb771] transition-colors";
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/90 backdrop-blur-md border-b border-white/5">
@@ -24,13 +47,17 @@ export default function Navbar({ isAuth = false }: NavbarProps) {
         <div className={`hidden md:flex items-center ${isAuth ? "gap-8" : ""} text-sm font-medium`}>
           {isAuth ? (
             <>
-              <Link href="/" className="hover:text-[#dfb771] transition-colors">Home</Link>
-              <Link href="/dashboard" className="hover:text-[#dfb771] transition-colors">Dashboard</Link>
-              <Link href="/book" className="hover:text-[#dfb771] transition-colors">Book</Link>
-              <Link href="/appointments" className="hover:text-[#dfb771] transition-colors">My appointments</Link>
+              <Link href="/" className={getLinkStyle("/")}>Home</Link>
+              <Link href="/dashboard" className={getLinkStyle("/dashboard")}>Dashboard</Link>
+              <Link href="/book" className={getLinkStyle("/book")}>Book</Link>
+              <Link href="/appointments" className={getLinkStyle("/appointments")}>My appointments</Link>
+              {/* Only render Admin link if the user is authorized */}
+              {isAdmin && (
+                <Link href="/admin" className={getLinkStyle("/admin")}>Admin</Link>
+              )}
             </>
           ) : (
-            <Link href="/" className="text-sm font-medium hover:text-[#dfb771] transition-colors">Home</Link>
+            <Link href="/" className={getLinkStyle("/")}>Home</Link>
           )}
         </div>
         
@@ -82,21 +109,26 @@ export default function Navbar({ isAuth = false }: NavbarProps) {
           </div>
           
           <div className="flex flex-col px-8 pb-8 gap-6 text-sm font-medium">
-            <Link href="/" className="hover:text-[#dfb771] transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+            <Link href="/" className={getLinkStyle("/")} onClick={() => setIsMobileMenuOpen(false)}>
               Home
             </Link>
 
             {isAuth ? (
               <>
-                <Link href="/dashboard" className="hover:text-[#dfb771] transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+                <Link href="/dashboard" className={getLinkStyle("/dashboard")} onClick={() => setIsMobileMenuOpen(false)}>
                   Dashboard
                 </Link>
-                <Link href="/book" className="hover:text-[#dfb771] transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+                <Link href="/book" className={getLinkStyle("/book")} onClick={() => setIsMobileMenuOpen(false)}>
                   Book
                 </Link>
-                <Link href="/appointments" className="hover:text-[#dfb771] transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
+                <Link href="/appointments" className={getLinkStyle("/appointments")} onClick={() => setIsMobileMenuOpen(false)}>
                   My appointments
                 </Link>
+                {isAdmin && (
+                  <Link href="/admin" className={getLinkStyle("/admin")} onClick={() => setIsMobileMenuOpen(false)}>
+                    Admin
+                  </Link>
+                )}
                 <div className="pt-2">
                   <Link href="/" className="flex items-center gap-3 hover:text-[#dfb771] transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
                     <LogOut size={18} />
