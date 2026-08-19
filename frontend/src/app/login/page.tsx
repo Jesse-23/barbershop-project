@@ -17,7 +17,7 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:8000/api/login/", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -32,6 +32,9 @@ export default function LoginPage() {
         localStorage.setItem("access_token", data.access);
         localStorage.setItem("refresh_token", data.refresh);
         localStorage.setItem("user_name", data.name);
+        
+        // Ensure email is also saved for admin authorization checks
+        localStorage.setItem("user_email", email);
 
         // Redirect to the dashboard
         router.push("/dashboard");

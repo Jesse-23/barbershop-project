@@ -62,13 +62,13 @@ export default function AdminDashboard() {
       const headers = { "Authorization": `Bearer ${token}` };
 
       // Fetch Stats
-      const statsRes = await fetch("http://localhost:8000/api/admin/stats/", { headers });
+      const statsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/stats/`, { headers });
       if (statsRes.ok) {
         setStats(await statsRes.json());
       }
 
       // Fetch Appointments
-      const aptRes = await fetch("http://localhost:8000/api/admin/appointments/", { headers });
+      const aptRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/appointments/`, { headers });
       if (aptRes.ok) {
         setAppointments(await aptRes.json());
       }
@@ -97,7 +97,7 @@ export default function AdminDashboard() {
   const handleUpdateStatus = async (id: number, newStatus: string) => {
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch(`http://localhost:8000/api/admin/appointments/${id}/`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/appointments/${id}/`, {
         method: "PATCH",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -118,7 +118,7 @@ export default function AdminDashboard() {
     if (!window.confirm("Are you sure you want to delete this appointment?")) return;
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch(`http://localhost:8000/api/admin/appointments/${id}/`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/appointments/${id}/`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`,

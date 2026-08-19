@@ -19,7 +19,7 @@ export default function SignupPage() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:8000/api/signup/", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/signup/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -29,7 +29,7 @@ export default function SignupPage() {
 
       if (response.ok) {
         // Automatically log the user in after successful signup
-        const loginResponse = await fetch("http://localhost:8000/api/login/", {
+        const loginResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/login/`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -43,6 +43,8 @@ export default function SignupPage() {
           localStorage.setItem("refresh_token", loginData.refresh);
           // Save the user's name locally so the dashboard can display it immediately
           localStorage.setItem("user_name", name);
+          // Save email locally for admin authorization check
+          localStorage.setItem("user_email", email);
         }
 
         // Redirect directly to the dashboard

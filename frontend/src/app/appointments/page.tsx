@@ -43,7 +43,7 @@ function AppointmentsContent() {
     const fetchAppointments = async () => {
       try {
         const token = localStorage.getItem("access_token");
-        const response = await fetch("http://localhost:8000/api/appointments/", {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/appointments/`, {
           headers: {
             "Authorization": `Bearer ${token}`
           }
